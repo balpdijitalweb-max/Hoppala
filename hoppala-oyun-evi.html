@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hoppala Oyun Evi - Yönetim Sistemi</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Nunito', sans-serif; background: #f0f4f8; color: #2d3748; }
+:root {
+  --primary: #6c5ce7; --primary-light: #a29bfe; --primary-dark: #5a4bd1;
+  --success: #00b894; --warning: #fdcb6e; --danger: #e17055;
+  --info: #74b9ff; --bg: #f0f4f8; --card: #ffffff;
+  --text: #2d3748; --text-light: #718096; --border: #e2e8f0;
+  --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+}
+.sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 260px; background: linear-gradient(180deg, #6c5ce7 0%, #5a4bd1 100%); color: white; padding: 0; z-index: 100; overflow-y: auto; }
+.sidebar-header { padding: 24px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.15); }
+.sidebar-header h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+.sidebar-header p { font-size: 12px; opacity: 0.8; }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 20px; cursor: pointer; transition: all 0.2s; font-size: 14px; font-weight: 600; border-left: 3px solid transparent; }
+.nav-item:hover { background: rgba(255,255,255,0.1); }
+.nav-item.active { background: rgba(255,255,255,0.15); border-left-color: white; }
+.nav-icon { font-size: 18px; width: 24px; text-align: center; }
+.main { margin-left: 260px; padding: 24px 32px; min-height: 100vh; }
+.page-header { margin-bottom: 24px; }
+.page-header h2 { font-size: 26px; font-weight: 800; color: var(--text); }
+.page-header p { color: var(--text-light); margin-top: 4px; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 16px; }
+.stat-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+.stat-icon.purple { background: #f0edff; }
+.stat-icon.green { background: #e6fff9; }
+.stat-icon.orange { background: #fff5e6; }
+.stat-icon.blue { background: #e6f3ff; }
+.stat-info h3 { font-size: 28px; font-weight: 800; line-height: 1; }
+.stat-info p { font-size: 13px; color: var(--text-light); margin-top: 2px; }
+.card { background: var(--card); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.card-header h3 { font-size: 18px; font-weight: 700; }
+.btn { padding: 10px 20px; border-radius: 10px; border: none; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.btn-success { background: var(--success); color: white; }
+.btn-success:hover { background: #00a381; }
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover { background: #c0392b; }
+.btn-warning { background: var(--warning); color: #2d3748; }
+.btn-info { background: var(--info); color: white; }
+.btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 8px; }
+.btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+.btn-outline:hover { background: var(--primary); color: white; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-light); border-bottom: 2px solid var(--border); letter-spacing: 0.5px; }
+td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 14px; }
+tr:hover { background: #f7fafc; }
+.badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-block; }
+.badge-active { background: #e6fff9; color: #00b894; }
+.badge-expired { background: #ffe6e0; color: #e17055; }
+.badge-warning { background: #fff5e6; color: #e67e22; }
+.badge-info { background: #e6f3ff; color: #0984e3; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+.form-control { width: 100%; padding: 10px 14px; border: 2px solid var(--border); border-radius: 10px; font-family: 'Nunito', sans-serif; font-size: 14px; transition: border-color 0.2s; outline: none; }
+.form-control:focus { border-color: var(--primary); }
+select.form-control { appearance: none; background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23718096' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 12px center; padding-right: 36px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: center; justify-content: center; }
+.modal { background: white; border-radius: 20px; padding: 32px; width: 90%; max-width: 560px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+.modal h3 { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
+.empty-state { text-align: center; padding: 48px 20px; color: var(--text-light); }
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state p { font-size: 15px; }
+.search-box { position: relative; margin-bottom: 16px; }
+.search-box input { width: 100%; padding: 10px 14px 10px 40px; border: 2px solid var(--border); border-radius: 10px; font-family: 'Nunito', sans-serif; font-size: 14px; outline: none; }
+.search-box input:focus { border-color: var(--primary); }
+.search-box .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-light); }
+.quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.quick-action { background: var(--card); border-radius: 14px; padding: 20px; box-shadow: var(--shadow); cursor: pointer; transition: all 0.2s; text-align: center; border: 2px solid transparent; }
+.quick-action:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.quick-action .qa-icon { font-size: 32px; margin-bottom: 8px; }
+.quick-action h4 { font-size: 14px; font-weight: 700; }
+.quick-action p { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+.active-list { display: flex; flex-direction: column; gap: 8px; }
+.active-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #f7fafc; border-radius: 10px; }
+.active-item .info { display: flex; align-items: center; gap: 12px; }
+.active-item .avatar { width: 36px; height: 36px; border-radius: 10px; background: var(--primary-light); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; }
+.tabs { display: flex; gap: 4px; margin-bottom: 20px; background: #f0f4f8; border-radius: 12px; padding: 4px; }
+.tab { padding: 8px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; color: var(--text-light); }
+.tab.active { background: white; color: var(--primary); box-shadow: var(--shadow); }
+.price-tag { font-size: 18px; font-weight: 800; color: var(--primary); }
+.package-card { border: 2px solid var(--border); border-radius: 14px; padding: 20px; text-align: center; transition: all 0.2s; }
+.package-card:hover { border-color: var(--primary); }
+.package-card.selected { border-color: var(--primary); background: #f0edff; }
+.package-card h4 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.package-card .price { font-size: 28px; font-weight: 800; color: var(--primary); }
+.package-card .price span { font-size: 14px; font-weight: 600; color: var(--text-light); }
+.package-card ul { list-style: none; margin-top: 12px; font-size: 13px; color: var(--text-light); }
+.package-card ul li { padding: 4px 0; }
+.progress-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--success); color: white; padding: 14px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; z-index: 300; box-shadow: var(--shadow-lg); animation: slideIn 0.3s ease; }
+@keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@media (max-width: 768px) {
+  .sidebar { width: 60px; }
+  .sidebar-header h1, .sidebar-header p, .nav-item span { display: none; }
+  .nav-item { justify-content: center; padding: 14px; }
+  .main { margin-left: 60px; padding: 16px; }
+  .form-row { grid-template-columns: 1fr; }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback, useMemo } = React;
+
+// ==================== STORAGE HELPERS ====================
+const storage = {
+  get: (key, def = []) => { try { return JSON.parse(localStorage.getItem('hoppala_' + key)) || def; } catch { return def; } },
+  set: (key, val) => localStorage.setItem('hoppala_' + key, JSON.stringify(val)),
+};
+const genId = () => Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+const formatDate = (d) => new Date(d).toLocaleDateString('tr-TR');
+const formatTime = (d) => new Date(d).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+const today = () => new Date().toISOString().split('T')[0];
+
+// ==================== TOAST ====================
+function Toast({ message, onClose }) {
+  useEffect(() => { const t = setTimeout(onClose, 3000); return () => clearTimeout(t); }, []);
+  return <div className="toast">{message}</div>;
+}
+
+// ==================== MODAL ====================
+function Modal({ title, onClose, children }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h3 style={{ margin: 0 }}>{title}</h3>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: '#718096' }}>&times;</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ==================== PRICES ====================
+const PRICES = {
+  SERBEST_1H: 290, SERBEST_2H: 390, SERBEST_GUN: 490,
+  ATOLYE: 550,
+  PAKET_HAFTALIK: 1200, PAKET_AYLIK: 3500, PAKET_12GIRIS: 2800,
+};
+
+// ==================== MAIN APP ====================
+function App() {
+  const [page, setPage] = useState('dashboard');
+  const [children, setChildren] = useState(() => storage.get('children'));
+  const [parents, setParents] = useState(() => storage.get('parents'));
+  const [attendances, setAttendances] = useState(() => storage.get('attendances'));
+  const [packages, setPackages] = useState(() => storage.get('packages'));
+  const [workshops, setWorkshops] = useState(() => storage.get('workshops'));
+  const [payments, setPayments] = useState(() => storage.get('payments'));
+  const [toast, setToast] = useState(null);
+
+  useEffect(() => storage.set('children', children), [children]);
+  useEffect(() => storage.set('parents', parents), [parents]);
+  useEffect(() => storage.set('attendances', attendances), [attendances]);
+  useEffect(() => storage.set('packages', packages), [packages]);
+  useEffect(() => storage.set('workshops', workshops), [workshops]);
+  useEffect(() => storage.set('payments', payments), [payments]);
+
+  const showToast = (msg) => setToast(msg);
+  const getParent = (id) => parents.find(p => p.id === id);
+  const getChild = (id) => children.find(c => c.id === id);
+
+  const activeAttendances = useMemo(() => attendances.filter(a => !a.checkOut && a.date === today()), [attendances]);
+
+  const todayAttendances = useMemo(() => attendances.filter(a => a.date === today()), [attendances]);
+
+  const todayRevenue = useMemo(() => {
+    return payments.filter(p => p.date === today()).reduce((sum, p) => sum + p.amount, 0);
+  }, [payments]);
+
+  const activePackages = useMemo(() => {
+    const now = new Date();
+    return packages.filter(p => {
+      if (p.type === '12giris') return p.remaining > 0;
+      return new Date(p.endDate) >= now;
+    });
+  }, [packages]);
+
+  const navItems = [
+    { id: 'dashboard', icon: '🏠', label: 'Ana Panel' },
+    { id: 'children', icon: '👶', label: 'Çocuklar' },
+    { id: 'attendance', icon: '🚪', label: 'Giriş-Çıkış' },
+    { id: 'packages', icon: '📦', label: 'Paketler' },
+    { id: 'workshops', icon: '🎨', label: 'Atölyeler' },
+    { id: 'payments', icon: '💰', label: 'Ödemeler' },
+    { id: 'reports', icon: '📊', label: 'Raporlar' },
+  ];
+
+  const ctx = { children, setChildren, parents, setParents, attendances, setAttendances, packages, setPackages, workshops, setWorkshops, payments, setPayments, showToast, getParent, getChild, activeAttendances, todayAttendances, todayRevenue, activePackages, setPage };
+
+  return (
+    <div>
+      <div className="sidebar">
+        <div className="sidebar-header">
+          <h1>🎪 Hoppala</h1>
+          <p>Oyun Evi Yönetimi</p>
+        </div>
+        {navItems.map(n => (
+          <div key={n.id} className={`nav-item ${page === n.id ? 'active' : ''}`} onClick={() => setPage(n.id)}>
+            <span className="nav-icon">{n.icon}</span>
+            <span>{n.label}</span>
+          </div>
+        ))}
+      </div>
+      <div className="main">
+        {page === 'dashboard' && <Dashboard {...ctx} />}
+        {page === 'children' && <ChildrenPage {...ctx} />}
+        {page === 'attendance' && <AttendancePage {...ctx} />}
+        {page === 'packages' && <PackagesPage {...ctx} />}
+        {page === 'workshops' && <WorkshopsPage {...ctx} />}
+        {page === 'payments' && <PaymentsPage {...ctx} />}
+        {page === 'reports' && <ReportsPage {...ctx} />}
+      </div>
+      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+    </div>
+  );
+}
+
+// ==================== DASHBOARD ====================
+function Dashboard({ children, todayAttendances, activeAttendances, todayRevenue, activePackages, setPage, attendances, workshops, packages, payments, showToast, setAttendances, setPayments, getChild }) {
+  const todayWorkshops = workshops.filter(w => w.date === today());
+
+  return (
+    <div>
+      <div className="page-header">
+        <h2>Ana Panel</h2>
+        <p>{new Date().toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+      </div>
+
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon purple">👶</div>
+          <div className="stat-info"><h3>{todayAttendances.length}</h3><p>Bugün Gelen Çocuk</p></div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon green">💰</div>
+          <div className="stat-info"><h3>{todayRevenue.toLocaleString('tr-TR')} ₺</h3><p>Günlük Ciro</p></div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon orange">🎮</div>
+          <div className="stat-info"><h3>{activeAttendances.length}</h3><p>Aktif Çocuk</p></div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon blue">📦</div>
+          <div className="stat-info"><h3>{activePackages.length}</h3><p>Aktif Paket</p></div>
+        </div>
+      </div>
+
+      <div className="quick-actions">
+        <div className="quick-action" onClick={() => setPage('attendance')}>
+          <div className="qa-icon">🚪</div>
+          <h4>Hızlı Giriş</h4>
+          <p>Çocuk girişi yap</p>
+        </div>
+        <div className="quick-action" onClick={() => setPage('children')}>
+          <div className="qa-icon">➕</div>
+          <h4>Yeni Kayıt</h4>
+          <p>Çocuk/Veli ekle</p>
+        </div>
+        <div className="quick-action" onClick={() => setPage('packages')}>
+          <div className="qa-icon">📦</div>
+          <h4>Paket Sat</h4>
+          <p>Yeni paket tanımla</p>
+        </div>
+        <div className="quick-action" onClick={() => setPage('workshops')}>
+          <div className="qa-icon">🎨</div>
+          <h4>Atölye</h4>
+          <p>Atölye kaydı aç</p>
+        </div>
+      </div>
+
+      <div className="grid-2">
+        <div className="card">
+          <div className="card-header"><h3>🎮 Şu An Oyunda</h3></div>
+          {activeAttendances.length === 0 ? (
+            <div className="empty-state"><div className="icon">🏜️</div><p>Şu an oyun alanında kimse yok</p></div>
+          ) : (
+            <div className="active-list">
+              {activeAttendances.map(a => {
+                const child = getChild(a.childId);
+                return (
+                  <div key={a.id} className="active-item">
+                    <div className="info">
+                      <div className="avatar">{child?.name?.charAt(0) || '?'}</div>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>{child?.name || 'Bilinmiyor'}</div>
+                        <div style={{ fontSize: 12, color: '#718096' }}>Giriş: {formatTime(a.checkIn)} • {a.type === 'serbest' ? 'Serbest Oyun' : 'Atölye'}</div>
+                      </div>
+                    </div>
+                    <span className="badge badge-active">Oyunda</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="card">
+          <div className="card-header"><h3>⚠️ Bitmek Üzere Paketler</h3></div>
+          {(() => {
+            const expiring = packages.filter(p => {
+              if (p.type === '12giris') return p.remaining > 0 && p.remaining <= 3;
+              const end = new Date(p.endDate);
+              const diff = (end - new Date()) / (1000 * 60 * 60 * 24);
+              return diff >= 0 && diff <= 3;
+            });
+            if (expiring.length === 0) return <div className="empty-state"><div className="icon">✅</div><p>Bitmek üzere paket yok</p></div>;
+            return (
+              <div className="active-list">
+                {expiring.map(p => {
+                  const child = getChild(p.childId);
+                  return (
+                    <div key={p.id} className="active-item">
+                      <div className="info">
+                        <div className="avatar" style={{ background: '#fdcb6e' }}>{child?.name?.charAt(0) || '?'}</div>
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: 14 }}>{child?.name || 'Bilinmiyor'}</div>
+                          <div style={{ fontSize: 12, color: '#718096' }}>
+                            {p.type === '12giris' ? `${p.remaining} giriş kaldı` : `Bitiş: ${formatDate(p.endDate)}`}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="badge badge-warning">Bitmek Üzere</span>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==================== CHILDREN PAGE ====================
+function ChildrenPage({ children, setChildren, parents, setParents, showToast }) {
+  const [showModal, setShowModal] = useState(false);
+  const [editChild, setEditChild] = useState(null);
+  const [search, setSearch] = useState('');
+  const [form, setForm] = useState({ name: '', age: '', parentName: '', parentPhone: '', parentNote: '', parentId: '' });
+
+  const openNew = () => { setForm({ name: '', age: '', parentName: '', parentPhone: '', parentNote: '', parentId: '' }); setEditChild(null); setShowModal(true); };
+
+  const openEdit = (child) => {
+    const parent = parents.find(p => p.id === child.parentId) || {};
+    setForm({ name: child.name, age: child.age, parentName: parent.name || '', parentPhone: parent.phone || '', parentNote: parent.note || '', parentId: child.parentId || '' });
+    setEditChild(child);
+    setShowModal(true);
+  };
+
+  const handleSave = () => {
+    if (!form.name || !form.age || !form.parentName || !form.parentPhone) { showToast('⚠️ Lütfen zorunlu alanları doldurun'); return; }
+
+    let parentId = form.parentId;
+    if (parentId) {
+      setParents(prev => prev.map(p => p.id === parentId ? { ...p, name: form.parentName, phone: form.parentPhone, note: form.parentNote } : p));
+    } else {
+      const existingParent = parents.find(p => p.phone === form.parentPhone);
+      if (existingParent) {
+        parentId = existingParent.id;
+        setParents(prev => prev.map(p => p.id === parentId ? { ...p, name: form.parentName, note: form.parentNote } : p));
+      } else {
+        parentId = genId();
+        setParents(prev => [...prev, { id: parentId, name: form.parentName, phone: form.parentPhone, note: form.parentNote }]);
+      }
+    }
+
+    if (editChild) {
+      setChildren(prev => prev.map(c => c.id === editChild.id ? { ...c, name: form.name, age: parseInt(form.age), parentId } : c));
+      showToast('✅ Çocuk bilgileri güncellendi');
+    } else {
+      setChildren(prev => [...prev, { id: genId(), name: form.name, age: parseInt(form.age), parentId, registrationDate: today() }]);
+      showToast('✅ Yeni çocuk kaydedildi');
+    }
+    setShowModal(false);
+  };
+
+  const handleDelete = (id) => {
+    if (confirm('Bu çocuğu silmek istediğinize emin misiniz?')) {
+      setChildren(prev => prev.filter(c => c.id !== id));
+      showToast('🗑️ Çocuk kaydı silindi');
+    }
+  };
+
+  const filtered = children.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <div>
+      <div className="page-header">
+        <h2>👶 Çocuk Kayıtları</h2>
+        <p>Tüm çocuk ve veli bilgilerini yönetin</p>
+      </div>
+
+      <div className="card">
+        <div className="card-header">
+          <div className="search-box" style={{ marginBottom: 0, flex: 1, maxWidth: 320 }}>
+            <span className="search-icon">🔍</span>
+            <input placeholder="Çocuk ara..." value={search} onChange={e => setSearch(e.target.value)} />
+          </div>
+          <button className="btn btn-primary" onClick={openNew}>➕ Yeni Çocuk</button>
+        </div>
+
+        {filtered.length === 0 ? (
+          <div className="empty-state"><div className="icon">👶</div><p>{children.length === 0 ? 'Henüz çocuk kaydı yok. İlk kaydı ekleyin!' : 'Aramanızla eşleşen sonuç bulunamadı.'}</p></div>
+        ) : (
+          <table>
+            <thead><tr><th>Ad Soyad</th><th>Yaş</th><th>Veli</th><th>Telefon</th><th>Kayıt Tarihi</th><th>İşlem</th></tr></thead>
+            <tbody>
+              {filtered.map(c => {
+                const parent = parents.find(p => p.id === c.parentId);
+                return (
+                  <tr key={c.id}>
+                    <td style={{ fontWeight: 700 }}>{c.name}</td>
+                    <td>{c.age}</td>
+                    <td>{parent?.name || '-'}</td>
+                    <td>{parent?.phone || '-'}</td>
+                    <td>{formatDate(c.registrationDate)}</td>
+                    <td>
+                      <button className="btn btn-sm btn-outline" onClick={() => openEdit(c)} style={{ marginRight: 6 }}>✏️</button>
+                      <button className="btn btn-sm btn-danger" onClick={() => handleDelete(c.id)}>🗑️</button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {showModal && (
+        <Modal title={editChild ? 'Çocuk Düzenle' : 'Yeni Çocuk Kaydı'} onClose={() => setShowModal(false)}>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Çocuk Ad Soyad *</label>
+              <input className="form-control" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Ad Soyad" />
+            </div>
+            <div className="form-group">
+              <label>Yaş *</label>
+              <input className="form-control" type="number" min="1" max="18" value={form.age} onChange={e => setForm({ ...form, age: e.target.value })} placeholder="Yaş" />
+            </div>
+          </div>
+          <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0', margin: '16px 0' }} />
+          <h4 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>👨‍👩‍👧 Veli Bilgileri</h4>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Veli Ad Soyad *</label>
+              <input className="form-control" value={form.parentName} onChange={e => setForm({ ...form, parentName: e.target.value })} placeholder="Veli Adı" />
+            </div>
+            <div className="form-group">
+              <label>Telefon *</label>
+              <input className="form-control" value={form.parentPhone} onChange={e => setForm({ ...form, parentPhone: e.target.value })} placeholder="0555 123 45 67" />
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Not (opsiyonel)</label>
+            <input className="form-control" value={form.parentNote} onChange={e => setForm({ ...form, parentNote: e.target.value })} placeholder="Alerji, sağlık durumu vb." />
+          </div>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
+            <button className="btn btn-outline" onClick={() => setShowModal(false)}>İptal</button>
+            <button className="btn btn-primary" onClick={handleSave}>{editChild ? 'Güncelle' : 'Kaydet'}</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ==================== ATTENDANCE PAGE ====================
+function AttendancePage({ children, attendances, setAttendances, packages, setPackages, payments, setPayments, showToast, getChild, getParent, parents }) {
+  const [showCheckin, setShowCheckin] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(null);
+  const [tab, setTab] = useState('active');
+  const [checkinForm, setCheckinForm] = useState({ childId: '', type: 'serbest', duration: '1h' });
+
+  const activeToday = attendances.filter(a => a.date === today() && !a.checkOut);
+  const completedToday = attendances.filter(a => a.date === today() && a.checkOut);
+
+  const handleCheckin = () => {
+    if (!checkinForm.childId) { showToast('⚠️ Çocuk seçin'); return; }
+
+    const now = new Date();
+    const att = {
+      id: genId(), childId: checkinForm.childId, date: today(),
+      checkIn: now.toISOString(), checkOut: null,
+      type: checkinForm.type, duration: checkinForm.type === 'serbest' ? checkinForm.duration : null,
+    };
+
+    // Check for active package
+    const childPackages = packages.filter(p => p.childId === checkinForm.childId);
+    const activePackage = childPackages.find(p => {
+      if (p.type === '12giris') return p.remaining > 0;
+      return new Date(p.endDate) >= now;
+    });
+
+    if (checkinForm.type === 'serbest') {
+      if (activePackage) {
+        att.paymentType = 'paket';
+        att.packageId = activePackage.id;
+        if (activePackage.type === '12giris') {
+          setPackages(prev => prev.map(p => p.id === activePackage.id ? { ...p, remaining: p.remaining - 1, used: p.used + 1 } : p));
+        }
+      } else {
+        let price = checkinForm.duration === '1h' ? PRICES.SERBEST_1H : checkinForm.duration === '2h' ? PRICES.SERBEST_2H : PRICES.SERBEST_GUN;
+        att.price = price;
+        att.paymentType = 'pending';
+      }
+    }
+
+    setAttendances(prev => [...prev, att]);
+    setShowCheckin(false);
+    showToast('✅ Giriş kaydedildi');
+  };
+
+  const handleCheckout = (att, paymentMethod) => {
+    const now = new Date();
+    const updated = { ...att, checkOut: now.toISOString() };
+
+    if (att.paymentType === 'pending' && paymentMethod) {
+      setPayments(prev => [...prev, {
+        id: genId(), date: today(), childId: att.childId, amount: att.price,
+        method: paymentMethod, type: 'serbest', description: `Serbest Oyun (${att.duration === '1h' ? '1 Saat' : att.duration === '2h' ? '2 Saat' : 'Gün Boyu'})`,
+      }]);
+      updated.paymentType = paymentMethod;
+    }
+
+    setAttendances(prev => prev.map(a => a.id === att.id ? updated : a));
+    setShowCheckout(null);
+    showToast('✅ Çıkış kaydedildi');
+  };
+
+  return (
+    <div>
+      <div className="page-header">
+        <h2>🚪 Giriş - Çıkış Yönetimi</h2>
+        <p>Çocukların oyun alanı giriş ve çıkışlarını yönetin</p>
+      </div>
+
+      <div className="stats-grid">
+        <div className="stat-card"><div className="stat-icon green">🟢</div><div className="stat-info"><h3>{activeToday.length}</h3><p>Şu An İçeride</p></div></div>
+        <div className="stat-card"><div className="stat-icon blue">✅</div><div className="stat-info"><h3>{completedToday.length}</h3><p>Bugün Çıkış Yapan</p></div></div>
+        <div className="stat-card"><div className="stat-icon purple">📊</div><div className="stat-info"><h3>{activeToday.length + completedToday.length}</h3><p>Toplam Giriş</p></div></div>
+      </div>
+
+      <div className="card">
+        <div className="card-header">
+          <div className="tabs" style={{ marginBottom: 0 }}>
+            <div className={`tab ${tab === 'active' ? 'active' : ''}`} onClick={() => setTab('active')}>🟢 Aktif ({activeToday.length})</div>
+            <div className={`tab ${tab === 'completed' ? 'active' : ''}`} onClick={() => setTab('completed')}>✅ Tamamlanan ({completedToday.length})</div>
+          </div>
+          <button className="btn btn-success" onClick={() => { setCheckinForm({ childId: '', type: 'serbest', duration: '1h' }); setShowCheckin(true); }}>🚪 Yeni Giriş</button>
+        </div>
+
+        {tab === 'active' && (
+          activeToday.length === 0 ? (
+            <div className="empty-state"><div className="icon">🏜️</div><p>Şu an oyun alanında kimse yok</p></div>
+          ) : (
+            <table>
+              <thead><tr><th>Çocuk</th><th>Giriş Saati</th><th>Tür</th><th>Süre</th><th>Ödeme</th><th>İşlem</th></tr></thead>
+              <tbody>
+                {activeToday.map(a => {
+                  const child = getChild(a.childId);
+                  const elapsed = Math.round((Date.now() - new Date(a.checkIn).getTime()) / 60000);
+                  return (
+                    <tr key={a.id}>
+                      <td style={{ fontWeight: 700 }}>{child?.name || 'Bilinmiyor'}</td>
+                      <td>{formatTime(a.checkIn)}</td>
+                      <td><span className="badge badge-info">{a.type === 'serbest' ? 'Serbest Oyun' : 'Atölye'}</span></td>
+                      <td>{a.duration === '1h' ? '1 Saat' : a.duration === '2h' ? '2 Saat' : a.duration === 'gun' ? 'Gün Boyu' : '-'} ({elapsed} dk)</td>
+                      <td>{a.paymentType === 'paket' ? <span className="badge badge-active">Paket</span> : a.price ? `${a.price} ₺` : '-'}</td>
+                      <td><button className="btn btn-sm btn-danger" onClick={() => setShowCheckout(a)}>🚪 Çıkış</button></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )
+        )}
+
+        {tab === 'completed' && (
+          completedToday.length === 0 ? (
+            <div className="empty-state"><div className="icon">📋</div><p>Bugün henüz çıkış yapan yok</p></div>
+          ) : (
+            <table>
+              <thead><tr><th>Çocuk</th><th>Giriş</th><th>Çıkış</th><th>Tür</th><th>Ödeme</th></tr></thead>
+              <tbody>
+                {completedToday.map(a => {
+                  const child = getChild(a.childId);
+                  return (
+                    <tr key={a.id}>
+                      <td style={{ fontWeight: 700 }}>{child?.name || 'Bilinmiyor'}</td>
+                      <td>{formatTime(a.checkIn)}</td>
+                      <td>{formatTime(a.checkOut)}</td>
+                      <td>{a.type === 'serbest' ? 'Serbest Oyun' : 'Atölye'}</td>
+                      <td>{a.paymentType === 'paket' ? 'Paket' : a.price ? `${a.price} ₺` : '-'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )
+        )}
+      </div>
+
+      {showCheckin && (
+        <Modal title="🚪 Yeni Giriş" onClose={() => setShowCheckin(false)}>
+          <div className="form-group">
+            <label>Çocuk Seçin *</label>
+            <select className="form-control" value={checkinForm.childId} onChange={e => setCheckinForm({ ...checkinForm, childId: e.target.value })}>
+              <option value="">-- Çocuk Seçin --</option>
+              {children.map(c => <option key={c.id} value={c.id}>{c.name} (Yaş: {c.age})</option>)}
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Katılım Türü *</label>
+            <select className="form-control" value={checkinForm.type} onChange={e => setCheckinForm({ ...checkinForm, type: e.target.value })}>
+              <option value="serbest">Serbest Oyun</option>
+              <option value="atolye">Atölye</option>
+            </select>
+          </div>
+          {checkinForm.type === 'serbest' && (
+            <div className="form-group">
+              <label>Süre Seçin *</label>
+              <div className="grid-3">
+                {[{ k: '1h', l: '1 Saat', p: PRICES.SERBEST_1H }, { k: '2h', l: '2 Saat', p: PRICES.SERBEST_2H }, { k: 'gun', l: 'Gün Boyu', p: PRICES.SERBEST_GUN }].map(o => (
+                  <div key={o.k} className={`package-card ${checkinForm.duration === o.k ? 'selected' : ''}`} onClick={() => setCheckinForm({ ...checkinForm, duration: o.k })} style={{ cursor: 'pointer', padding: 14 }}>
+                    <h4>{o.l}</h4>
+                    <div className="price">{o.p} <span>₺</span></div>
+                  </div>
+                ))}
+              </div>
+              {checkinForm.childId && (() => {
+                const ap = packages.find(p => {
+                  if (p.childId !== checkinForm.childId) return false;
+                  if (p.type === '12giris') return p.remaining > 0;
+                  return new Date(p.endDate) >= new Date();
+                });
+                if (ap) return <div style={{ marginTop: 12, padding: 12, background: '#e6fff9', borderRadius: 10, fontSize: 13, fontWeight: 600, color: '#00b894' }}>✅ Aktif paket bulundu! Paket kullanımı olarak kaydedilecek.</div>;
+                return null;
+              })()}
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
+            <button className="btn btn-outline" onClick={() => setShowCheckin(false)}>İptal</button>
+            <button className="btn btn-success" onClick={handleCheckin}>Giriş Yap</button>
+          </div>
+        </Modal>
+      )}
+
+      {showCheckout && (
+        <Modal title="🚪 Çıkış Yap" onClose={() => setShowCheckout(null)}>
+          <div style={{ textAlign: 'center', marginBottom: 20 }}>
+            <div style={{ fontSize: 48, marginBottom: 8 }}>👋</div>
+            <h4>{getChild(showCheckout.childId)?.name}</h4>
+            <p style={{ color: '#718096', fontSize: 14 }}>Giriş: {formatTime(showCheckout.checkIn)}</p>
+          </div>
+          {showCheckout.paymentType === 'paket' ? (
+            <div>
+              <div style={{ padding: 16, background: '#e6fff9', borderRadius: 10, textAlign: 'center', marginBottom: 16 }}>
+                <p style={{ fontWeight: 700, color: '#00b894' }}>Paket kullanımı — ek ücret yok</p>
+              </div>
+              <button className="btn btn-success" style={{ width: '100%' }} onClick={() => handleCheckout(showCheckout, null)}>Çıkışı Tamamla</button>
+            </div>
+          ) : (
+            <div>
+              <div style={{ padding: 16, background: '#f0edff', borderRadius: 10, textAlign: 'center', marginBottom: 16 }}>
+                <p style={{ fontSize: 13, color: '#718096' }}>Ödenecek Tutar</p>
+                <p className="price-tag" style={{ fontSize: 32 }}>{showCheckout.price} ₺</p>
+              </div>
+              <p style={{ fontWeight: 700, marginBottom: 10, fontSize: 14 }}>Ödeme Yöntemi:</p>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button className="btn btn-success" style={{ flex: 1 }} onClick={() => handleCheckout(showCheckout, 'nakit')}>💵 Nakit</button>
+                <button className="btn btn-info" style={{ flex: 1 }} onClick={() => handleCheckout(showCheckout, 'kart')}>💳 Kredi Kartı</button>
+              </div>
+            </div>
+          )}
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ==================== PACKAGES PAGE ====================
+function PackagesPage({ children, packages, setPackages, payments, setPayments, showToast, getChild }) {
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({ childId: '', type: 'haftalik', paymentMethod: 'nakit' });
+
+  const handleSave = () => {
+    if (!form.childId) { showToast('⚠️ Çocuk seçin'); return; }
+    const now = new Date();
+    let pkg = { id: genId(), childId: form.childId, type: form.type, startDate: today(), createdAt: now.toISOString() };
+
+    if (form.type === 'haftalik') {
+      const end = new Date(now); end.setDate(end.getDate() + 7);
+      pkg.endDate = end.toISOString().split('T')[0];
+      pkg.price = PRICES.PAKET_HAFTALIK;
+    } else if (form.type === 'aylik') {
+      const end = new Date(now); end.setDate(end.getDate() + 30);
+      pkg.endDate = end.toISOString().split('T')[0];
+      pkg.price = PRICES.PAKET_AYLIK;
+    } else {
+      const end = new Date(now); end.setDate(end.getDate() + 30);
+      pkg.endDate = end.toISOString().split('T')[0];
+      pkg.price = PRICES.PAKET_12GIRIS;
+      pkg.total = 12;
+      pkg.remaining = 12;
+      pkg.used = 0;
+    }
+
+    setPackages(prev => [...prev, pkg]);
+    setPayments(prev => [...prev, {
+      id: genId(), date: today(), childId: form.childId, amount: pkg.price,
+      method: form.paymentMethod, type: 'paket',
+      description: `${form.type === 'haftalik' ? 'Haftalık' : form.type === 'aylik' ? 'Aylık' : '12 Giriş'} Paket`,
+    }]);
+    setShowModal(false);
+    showToast('✅ Paket oluşturuldu');
+  };
+
+  const getStatus = (pkg) => {
+    if (pkg.type === '12giris') {
+      if (pkg.remaining <= 0) return 'expired';
+      if (pkg.remaining <= 3) return 'warning';
+      return 'active';
+    }
+    const end = new Date(pkg.endDate);
+    if (end < new Date()) return 'expired';
+    const diff = (end - new Date()) / (1000 * 60 * 60 * 24);
+    if (diff <= 3) return 'warning';
+    return 'active';
+  };
+
+  return (
+    <div>
+      <div className="page-header">
+        <h2>📦 Paket Yönetimi</h2>
+        <p>Haftalık, aylık ve 12 giriş paketlerini yönetin</p>
+      </div>
+
+      <div className="grid-3" style={{ marginBottom: 24 }}>
+        <div className="package-card">
+          <h4>Haftalık Paket</h4>
+          <div className="price">{PRICES.PAKET_HAFTALIK.toLocaleString('tr-TR')} <span>₺</span></div>
+          <ul><li>Sınırsız giriş</li><li>Günlük max 2 saat</li><li>7 gün geçerli</li></ul>
+        </div>
+        <div className="package-card">
+          <h4>Aylık Paket</h4>
+          <div className="price">{PRICES.PAKET_AYLIK.toLocaleString('tr-TR')} <span>₺</span></div>
+          <ul><li>Sınırsız giriş</li><li>Günlük max 2 saat</li><li>30 gün geçerli</li></ul>
+        </div>
+        <div className="package-card">
+          <h4>12 Giriş Paketi</h4>
+          <div className="price">{PRICES.PAKET_12GIRIS.toLocaleString('tr-TR')} <span>₺</span></div>
+          <ul><li>12 giriş hakkı</li><li>Her giriş max 2 saat</li><li>30 gün geçerli</li></ul>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-header">
+          <h3>Aktif Paketler</h3>
+          <button className="btn btn-primary" onClick={() => { setForm({ childId: '', type: 'haftalik', paymentMethod: 'nakit' }); setShowModal(true); }}>➕ Yeni Paket</button>
+        </div>
+        {packages.length === 0 ? (
+          <div className="empty-state"><div className="icon">📦</div><p>Henüz paket tanımlanmamış</p></div>
+        ) : (
+          <table>
+            <thead><tr><th>Çocuk</th><th>Paket</th><th>Başlangıç</th><th>Bitiş</th><th>Kullanım</th><th>Durum</th></tr></thead>
+            <tbody>
+              {packages.map(p => {
+                const child = getChild(p.childId);
+                const status = getStatus(p);
+                return (
+                  <tr key={p.id}>
+                    <td style={{ fontWeight: 700 }}>{child?.name || 'Bilinmiyor'}</td>
+                    <td>{p.type === 'haftalik' ? 'Haftalık' : p.type === 'aylik' ? 'Aylık' : '12 Giriş'}</td>
+                    <td>{formatDate(p.startDate)}</td>
+                    <td>{formatDate(p.endDate)}</td>
+                    <td>
+                      {p.type === '12giris' ? (
+                        <div>
+                          <div style={{ fontSize: 13, marginBottom: 4 }}>{p.used}/{p.total} giriş kullanıldı</div>
+                          <div className="progress-bar"><div className="progress-fill" style={{ width: `${(p.used / p.total) * 100}%`, background: status === 'expired' ? '#e17055' : status === 'warning' ? '#fdcb6e' : '#00b894' }}></div></div>
+                        </div>
+                      ) : 'Sınırsız'}
+                    </td>
+                    <td>
+                      <span className={`badge badge-${status}`}>
+                        {status === 'active' ? 'Aktif' : status === 'warning' ? 'Bitmek Üzere' : 'Süresi Dolmuş'}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {showModal && (
+        <Modal title="📦 Yeni Paket Oluştur" onClose={() => setShowModal(false)}>
+          <div className="form-group">
+            <label>Çocuk Seçin *</label>
+            <select className="form-control" value={form.childId} onChange={e => setForm({ ...form, childId: e.target.value })}>
+              <option value="">-- Çocuk Seçin --</option>
+              {children.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Paket Türü *</label>
+            <div className="grid-3">
+              {[
+                { k: 'haftalik', l: 'Haftalık', p: PRICES.PAKET_HAFTALIK },
+                { k: 'aylik', l: 'Aylık', p: PRICES.PAKET_AYLIK },
+                { k: '12giris', l: '12 Giriş', p: PRICES.PAKET_12GIRIS },
+              ].map(o => (
+                <div key={o.k} className={`package-card ${form.type === o.k ? 'selected' : ''}`} onClick={() => setForm({ ...form, type: o.k })} style={{ cursor: 'pointer', padding: 14 }}>
+                  <h4>{o.l}</h4>
+                  <div className="price" style={{ fontSize: 20 }}>{o.p.toLocaleString('tr-TR')} <span>₺</span></div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Ödeme Yöntemi *</label>
+            <select className="form-control" value={form.paymentMethod} onChange={e => setForm({ ...form, paymentMethod: e.target.value })}>
+              <option value="nakit">💵 Nakit</option>
+              <option value="kart">💳 Kredi Kartı</option>
+            </select>
+          </div>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
+            <button className="btn btn-outline" onClick={() => setShowModal(false)}>İptal</button>
+            <button className="btn btn-primary" onClick={handleSave}>Paket Oluştur</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ==================== WORKSHOPS PAGE ====================
+function WorkshopsPage({ children, workshops, setWorkshops, payments, setPayments, attendances, setAttendances, showToast, getChild }) {
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({ name: '', childIds: [], paymentMethod: 'nakit' });
+
+  const handleToggleChild = (id) => {
+    setForm(f => ({ ...f, childIds: f.childIds.includes(id) ? f.childIds.filter(c => c !== id) : [...f.childIds, id] }));
+  };
+
+  const handleSave = () => {
+    if (!form.name || form.childIds.length === 0) { showToast('⚠️ Atölye adı ve en az bir çocuk seçin'); return; }
+
+    const workshopId = genId();
+    const now = new Date();
+
+    form.childIds.forEach(childId => {
+      setWorkshops(prev => [...prev, { id: genId(), workshopId, name: form.name, childId, date: today(), time: now.toISOString(), price: PRICES.ATOLYE }]);
+      setPayments(prev => [...prev, {
+        id: genId(), date: today(), childId, amount: PRICES.ATOLYE,
+        method: form.paymentMethod, type: 'atolye', description: `Atölye: ${form.name}`,
+      }]);
+      setAttendances(prev => [...prev, {
+        id: genId(), childId, date: today(), checkIn: now.toISOString(), checkOut: null,
+        type: 'atolye', workshopName: form.name, paymentType: form.paymentMethod,
+      }]);
+    });
+
+    setShowModal(false);
+    showToast(`✅ Atölye kaydı oluşturuldu (${form.childIds.length} çocuk)`);
+  };
+
+  const todayWorkshops = workshops.filter(w => w.date === today());
+  const groupedWorkshops = todayWorkshops.reduce((acc, w) => {
+    if (!acc[w.name]) acc[w.name] = [];
+    acc[w.name].push(w);
+    return acc;
+  }, {});
+
+  return (
+    <div>
+      <div className="page-header">
+        <h2>🎨 Atölye Yönetimi</h2>
+        <p>Atölye aktivitelerini yönetin — Kişi başı {PRICES.ATOLYE} ₺</p>
+      </div>
+
+      <div className="stats-grid">
+        <div className="stat-card"><div className="stat-icon purple">🎨</div><div className="stat-info"><h3>{Object.keys(groupedWorkshops).length}</h3><p>Bugünkü Atölye</p></div></div>
+        <div className="stat-card"><div className="stat-icon green">👶</div><div className="stat-info"><h3>{todayWorkshops.length}</h3><p>Toplam Katılımcı</p></div></div>
+        <div className="stat-card"><div className="stat-icon orange">💰</div><div className="stat-info"><h3>{(todayWorkshops.length * PRICES.ATOLYE).toLocaleString('tr-TR')} ₺</h3><p>Atölye Cirosu</p></div></div>
+      </div>
+
+      <div className="card">
+        <div className="card-header">
+          <h3>Bugünkü Atölyeler</h3>
+          <button className="btn btn-primary" onClick={() => { setForm({ name: '', childIds: [], paymentMethod: 'nakit' }); setShowModal(true); }}>➕ Yeni Atölye</button>
+        </div>
+        {Object.keys(groupedWorkshops).length === 0 ? (
+          <div className="empty-state"><div className="icon">🎨</div><p>Bugün henüz atölye kaydı yok</p></div>
+        ) : (
+          Object.entries(groupedWorkshops).map(([name, items]) => (
+            <div key={name} style={{ marginBottom: 16, padding: 16, background: '#f7fafc', borderRadius: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                <h4 style={{ fontSize: 16, fontWeight: 700 }}>🎨 {name}</h4>
+                <span className="badge badge-info">{items.length} katılımcı</span>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {items.map(w => {
+                  const child = getChild(w.childId);
+                  return (
+                    <div key={w.id} style={{ background: 'white', padding: '6px 14px', borderRadius: 8, fontSize: 13, fontWeight: 600 }}>
+                      {child?.name || 'Bilinmiyor'}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="card">
+        <div className="card-header"><h3>Tüm Atölye Geçmişi</h3></div>
+        {workshops.length === 0 ? (
+          <div className="empty-state"><div className="icon">📋</div><p>Atölye geçmişi boş</p></div>
+        ) : (
+          <table>
+            <thead><tr><th>Tarih</th><th>Atölye</th><th>Çocuk</th><th>Ücret</th></tr></thead>
+            <tbody>
+              {[...workshops].reverse().map(w => (
+                <tr key={w.id}>
+                  <td>{formatDate(w.date)}</td>
+                  <td style={{ fontWeight: 700 }}>{w.name}</td>
+                  <td>{getChild(w.childId)?.name || 'Bilinmiyor'}</td>
+                  <td>{w.price} ₺</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {showModal && (
+        <Modal title="🎨 Yeni Atölye Kaydı" onClose={() => setShowModal(false)}>
+          <div className="form-group">
+            <label>Atölye Adı *</label>
+            <input className="form-control" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="ör. Seramik, Resim, Müzik..." />
+          </div>
+          <div className="form-group">
+            <label>Katılımcı Çocuklar * ({form.childIds.length} seçili)</label>
+            <div style={{ maxHeight: 200, overflow: 'auto', border: '2px solid #e2e8f0', borderRadius: 10, padding: 8 }}>
+              {children.length === 0 ? <p style={{ padding: 10, color: '#718096', fontSize: 13 }}>Henüz çocuk kaydı yok</p> :
+                children.map(c => (
+                  <div key={c.id} onClick={() => handleToggleChild(c.id)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 8, cursor: 'pointer', background: form.childIds.includes(c.id) ? '#f0edff' : 'transparent', marginBottom: 2 }}>
+                    <div style={{ width: 20, height: 20, borderRadius: 6, border: '2px solid ' + (form.childIds.includes(c.id) ? '#6c5ce7' : '#e2e8f0'), background: form.childIds.includes(c.id) ? '#6c5ce7' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 12 }}>{form.childIds.includes(c.id) ? '✓' : ''}</div>
+                    <span style={{ fontWeight: 600, fontSize: 14 }}>{c.name}</span>
+                    <span style={{ fontSize: 12, color: '#718096' }}>Yaş: {c.age}</span>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Ödeme Yöntemi *</label>
+            <select className="form-control" value={form.paymentMethod} onChange={e => setForm({ ...form, paymentMethod: e.target.value })}>
+              <option value="nakit">💵 Nakit</option>
+              <option value="kart">💳 Kredi Kartı</option>
+            </select>
+          </div>
+          <div style={{ padding: 12, background: '#f0edff', borderRadius: 10, marginBottom: 16 }}>
+            <p style={{ fontSize: 13, color: '#718096' }}>Toplam Ücret</p>
+            <p className="price-tag">{(form.childIds.length * PRICES.ATOLYE).toLocaleString('tr-TR')} ₺</p>
+            <p style={{ fontSize: 12, color: '#718096' }}>{form.childIds.length} çocuk × {PRICES.ATOLYE} ₺</p>
+          </div>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+            <button className="btn btn-outline" onClick={() => setShowModal(false)}>İptal</button>
+            <button className="btn btn-primary" onClick={handleSave}>Kaydet</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ==================== PAYMENTS PAGE ====================
+function PaymentsPage({ payments, getChild, showToast }) {
+  const [filter, setFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState(today());
+
+  const filtered = payments.filter(p => {
+    if (filter !== 'all' && p.type !== filter) return false;
+    if (dateFilter && p.date !== dateFilter) return false;
+    return true;
+  });
+
+  const total = filtered.reduce((s, p) => s + p.amount, 0);
+  const cashTotal = filtered.filter(p => p.method === 'nakit').reduce((s, p) => s + p.amount, 0);
+  const cardTotal = filtered.filter(p => p.method === 'kart').reduce((s, p) => s + p.amount, 0);
+
+  return (
+    <div>
+      <div className="page-header">
+        <h2>💰 Ödeme Yönetimi</h2>
+        <p>Tüm ödemeleri görüntüleyin ve yönetin</p>
+      </div>
+
+      <div className="stats-grid">
+        <div className="stat-card"><div className="stat-icon green">💰</div><div className="stat-info"><h3>{total.toLocaleString('tr-TR')} ₺</h3><p>Toplam</p></div></div>
+        <div className="stat-card"><div className="stat-icon purple">💵</div><div className="stat-info"><h3>{cashTotal.toLocaleString('tr-TR')} ₺</h3><p>Nakit</p></div></div>
+        <div className="stat-card"><div className="stat-icon blue">💳</div><div className="stat-info"><h3>{cardTotal.toLocaleString('tr-TR')} ₺</h3><p>Kredi Kartı</p></div></div>
+      </div>
+
+      <div className="card">
+        <div className="card-header">
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <input type="date" className="form-control" value={dateFilter} onChange={e => setDateFilter(e.target.value)} style={{ width: 180 }} />
+            <select className="form-control" value={filter} onChange={e => setFilter(e.target.value)} style={{ width: 160 }}>
+              <option value="all">Tümü</option>
+              <option value="serbest">Serbest Oyun</option>
+              <option value="atolye">Atölye</option>
+              <option value="paket">Paket</option>
+            </select>
+          </div>
+          <button className="btn btn-sm btn-outline" onClick={() => setDateFilter('')}>Tüm Tarihler</button>
+        </div>
+
+        {filtered.length === 0 ? (
+          <div className="empty-state"><div className="icon">💰</div><p>Bu tarih ve filtreye ait ödeme bulunamadı</p></div>
+        ) : (
+          <table>
+            <thead><tr><th>Tarih</th><th>Çocuk</th><th>Açıklama</th><th>Yöntem</th><th>Tutar</th></tr></thead>
+            <tbody>
+              {[...filtered].reverse().map(p => (
+                <tr key={p.id}>
+                  <td>{formatDate(p.date)}</td>
+                  <td style={{ fontWeight: 700 }}>{getChild(p.childId)?.name || 'Bilinmiyor'}</td>
+                  <td>{p.description}</td>
+                  <td><span className="badge badge-info">{p.method === 'nakit' ? '💵 Nakit' : '💳 Kart'}</span></td>
+                  <td style={{ fontWeight: 700, color: '#00b894' }}>{p.amount.toLocaleString('tr-TR')} ₺</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ==================== REPORTS PAGE ====================
+function ReportsPage({ attendances, payments, workshops, packages, children, getChild }) {
+  const [reportDate, setReportDate] = useState(today());
+  const [tab, setTab] = useState('daily');
+
+  const dayAtt = attendances.filter(a => a.date === reportDate);
+  const dayPay = payments.filter(p => p.date === reportDate);
+  const dayWorkshops = workshops.filter(w => w.date === reportDate);
+  const dayRevenue = dayPay.reduce((s, p) => s + p.amount, 0);
+  const serbestCount = dayAtt.filter(a => a.type === 'serbest').length;
+  const atolyeCount = dayAtt.filter(a => a.type === 'atolye').length;
+
+  // Monthly summary
+  const currentMonth = reportDate.substring(0, 7);
+  const monthPay = payments.filter(p => p.date.startsWith(currentMonth));
+  const monthRevenue = monthPay.reduce((s, p) => s + p.amount, 0);
+  const monthAtt = attendances.filter(a => a.date.startsWith(currentMonth));
+
+  const activePackages = packages.filter(p => {
+    if (p.type === '12giris') return p.remaining > 0;
+    return new Date(p.endDate) >= new Date();
+  });
+
+  return (
+    <div>
+      <div className="page-header">
+        <h2>📊 Raporlar</h2>
+        <p>Günlük ve aylık raporları inceleyin</p>
+      </div>
+
+      <div className="tabs">
+        <div className={`tab ${tab === 'daily' ? 'active' : ''}`} onClick={() => setTab('daily')}>📅 Günlük Rapor</div>
+        <div className={`tab ${tab === 'monthly' ? 'active' : ''}`} onClick={() => setTab('monthly')}>📆 Aylık Özet</div>
+        <div className={`tab ${tab === 'packages' ? 'active' : ''}`} onClick={() => setTab('packages')}>📦 Paket Raporu</div>
+      </div>
+
+      {tab === 'daily' && (
+        <div>
+          <div style={{ marginBottom: 16 }}>
+            <input type="date" className="form-control" value={reportDate} onChange={e => setReportDate(e.target.value)} style={{ width: 200 }} />
+          </div>
+          <div className="stats-grid">
+            <div className="stat-card"><div className="stat-icon purple">👶</div><div className="stat-info"><h3>{dayAtt.length}</h3><p>Gelen Çocuk</p></div></div>
+            <div className="stat-card"><div className="stat-icon green">🎮</div><div className="stat-info"><h3>{serbestCount}</h3><p>Serbest Oyun</p></div></div>
+            <div className="stat-card"><div className="stat-icon orange">🎨</div><div className="stat-info"><h3>{atolyeCount}</h3><p>Atölye Katılımı</p></div></div>
+            <div className="stat-card"><div className="stat-icon blue">💰</div><div className="stat-info"><h3>{dayRevenue.toLocaleString('tr-TR')} ₺</h3><p>Toplam Ciro</p></div></div>
+          </div>
+
+          <div className="grid-2">
+            <div className="card">
+              <div className="card-header"><h3>Gelir Dağılımı</h3></div>
+              {(() => {
+                const serbestRev = dayPay.filter(p => p.type === 'serbest').reduce((s, p) => s + p.amount, 0);
+                const atolyeRev = dayPay.filter(p => p.type === 'atolye').reduce((s, p) => s + p.amount, 0);
+                const paketRev = dayPay.filter(p => p.type === 'paket').reduce((s, p) => s + p.amount, 0);
+                if (dayRevenue === 0) return <div className="empty-state"><p>Bu tarihte gelir kaydı yok</p></div>;
+                return (
+                  <div>
+                    {[{ l: 'Serbest Oyun', v: serbestRev, c: '#6c5ce7' }, { l: 'Atölye', v: atolyeRev, c: '#00b894' }, { l: 'Paket', v: paketRev, c: '#74b9ff' }].map(item => (
+                      <div key={item.l} style={{ marginBottom: 12 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
+                          <span>{item.l}</span>
+                          <span>{item.v.toLocaleString('tr-TR')} ₺</span>
+                        </div>
+                        <div className="progress-bar"><div className="progress-fill" style={{ width: `${dayRevenue > 0 ? (item.v / dayRevenue) * 100 : 0}%`, background: item.c }}></div></div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+            <div className="card">
+              <div className="card-header"><h3>Ödeme Yöntemleri</h3></div>
+              {(() => {
+                const cash = dayPay.filter(p => p.method === 'nakit').reduce((s, p) => s + p.amount, 0);
+                const card = dayPay.filter(p => p.method === 'kart').reduce((s, p) => s + p.amount, 0);
+                if (dayRevenue === 0) return <div className="empty-state"><p>Bu tarihte ödeme yok</p></div>;
+                return (
+                  <div>
+                    <div style={{ display: 'flex', gap: 16 }}>
+                      <div style={{ flex: 1, textAlign: 'center', padding: 20, background: '#e6fff9', borderRadius: 12 }}>
+                        <div style={{ fontSize: 28, marginBottom: 4 }}>💵</div>
+                        <div style={{ fontWeight: 800, fontSize: 20 }}>{cash.toLocaleString('tr-TR')} ₺</div>
+                        <div style={{ fontSize: 12, color: '#718096' }}>Nakit</div>
+                      </div>
+                      <div style={{ flex: 1, textAlign: 'center', padding: 20, background: '#e6f3ff', borderRadius: 12 }}>
+                        <div style={{ fontSize: 28, marginBottom: 4 }}>💳</div>
+                        <div style={{ fontWeight: 800, fontSize: 20 }}>{card.toLocaleString('tr-TR')} ₺</div>
+                        <div style={{ fontSize: 12, color: '#718096' }}>Kredi Kartı</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tab === 'monthly' && (
+        <div>
+          <div className="stats-grid">
+            <div className="stat-card"><div className="stat-icon purple">📅</div><div className="stat-info"><h3>{monthAtt.length}</h3><p>Aylık Toplam Giriş</p></div></div>
+            <div className="stat-card"><div className="stat-icon green">💰</div><div className="stat-info"><h3>{monthRevenue.toLocaleString('tr-TR')} ₺</h3><p>Aylık Ciro</p></div></div>
+            <div className="stat-card"><div className="stat-icon blue">👶</div><div className="stat-info"><h3>{children.length}</h3><p>Toplam Kayıtlı Çocuk</p></div></div>
+          </div>
+          <div className="card">
+            <div className="card-header"><h3>Bu Ayın Günlük Ciro Dağılımı</h3></div>
+            {(() => {
+              const days = {};
+              monthPay.forEach(p => { days[p.date] = (days[p.date] || 0) + p.amount; });
+              const entries = Object.entries(days).sort();
+              if (entries.length === 0) return <div className="empty-state"><p>Bu ay henüz ciro yok</p></div>;
+              const maxVal = Math.max(...entries.map(e => e[1]));
+              return (
+                <div>
+                  {entries.map(([date, amount]) => (
+                    <div key={date} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, width: 80, color: '#718096' }}>{formatDate(date)}</span>
+                      <div style={{ flex: 1 }}>
+                        <div className="progress-bar" style={{ height: 20, borderRadius: 6 }}>
+                          <div className="progress-fill" style={{ width: `${(amount / maxVal) * 100}%`, background: 'linear-gradient(90deg, #6c5ce7, #a29bfe)', borderRadius: 6, display: 'flex', alignItems: 'center', paddingLeft: 8 }}>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: 'white' }}>{amount > maxVal * 0.2 ? `${amount.toLocaleString('tr-TR')} ₺` : ''}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <span style={{ fontSize: 13, fontWeight: 700, width: 90, textAlign: 'right' }}>{amount.toLocaleString('tr-TR')} ₺</span>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
+      {tab === 'packages' && (
+        <div>
+          <div className="stats-grid">
+            <div className="stat-card"><div className="stat-icon purple">📦</div><div className="stat-info"><h3>{activePackages.length}</h3><p>Aktif Paket</p></div></div>
+            <div className="stat-card"><div className="stat-icon orange">⚠️</div><div className="stat-info"><h3>{activePackages.filter(p => { if (p.type === '12giris') return p.remaining <= 3; const diff = (new Date(p.endDate) - new Date()) / (1000*60*60*24); return diff <= 3; }).length}</h3><p>Bitmek Üzere</p></div></div>
+            <div className="stat-card"><div className="stat-icon green">💰</div><div className="stat-info"><h3>{payments.filter(p => p.type === 'paket').reduce((s, p) => s + p.amount, 0).toLocaleString('tr-TR')} ₺</h3><p>Toplam Paket Geliri</p></div></div>
+          </div>
+          <div className="card">
+            <div className="card-header"><h3>Tüm Paketler</h3></div>
+            {packages.length === 0 ? (
+              <div className="empty-state"><div className="icon">📦</div><p>Henüz paket yok</p></div>
+            ) : (
+              <table>
+                <thead><tr><th>Çocuk</th><th>Paket</th><th>Başlangıç</th><th>Bitiş</th><th>Durum</th><th>Detay</th></tr></thead>
+                <tbody>
+                  {packages.map(p => {
+                    const child = getChild(p.childId);
+                    const isExpired = p.type === '12giris' ? p.remaining <= 0 : new Date(p.endDate) < new Date();
+                    return (
+                      <tr key={p.id}>
+                        <td style={{ fontWeight: 700 }}>{child?.name || '?'}</td>
+                        <td>{p.type === 'haftalik' ? 'Haftalık' : p.type === 'aylik' ? 'Aylık' : '12 Giriş'}</td>
+                        <td>{formatDate(p.startDate)}</td>
+                        <td>{formatDate(p.endDate)}</td>
+                        <td><span className={`badge ${isExpired ? 'badge-expired' : 'badge-active'}`}>{isExpired ? 'Bitti' : 'Aktif'}</span></td>
+                        <td>{p.type === '12giris' ? `${p.remaining}/${p.total} kalan` : 'Sınırsız'}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ==================== RENDER ====================
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
